@@ -9,6 +9,10 @@ let X_to_play = true
 
 function setup() {
   createCanvas(Canvas_length, Canvas_length);
+
+  let newGame = createButton("Start new game")
+  newGame.position(Canvas_length,30)
+  newGame.mousePressed(clearBoard)
 };
 
 function draw() {
@@ -18,6 +22,7 @@ function draw() {
   moves_rendering.forEach(element => element())
 }
 
+
 function mouseClicked(){
   is_in_canvas = (mouseX <= Canvas_length) && (mouseY <= Canvas_length)
   if(is_in_canvas){
@@ -25,6 +30,10 @@ function mouseClicked(){
     moves_rendering.push(drawfunc(mouseX,mouseY))
     X_to_play = !X_to_play
   }
+}
+function clearBoard(){
+  moves_rendering = []
+  X_to_play = true
 }
 
 function drawTicTacToe(weight = 3) {
