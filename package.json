@@ -1,0 +1,19 @@
+{
+  "name": "p5-minimax",
+  "version": "1.0.0",
+  "description": "A demonstration of different implementations of minimax using p5.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "p5-minimax"
+  },
+  "keywords": [
+    "p5.js",
+    "minimax"
+  ],
+  "author": "m\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b Makapane Khoza",
+  "license": "MIT"
+}
