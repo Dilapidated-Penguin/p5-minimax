@@ -1,11 +1,12 @@
 const Canvas_length = 400
-const tic_tac_size = 5
+const tic_tac_size = 3
 const icon_buffer = 15
-
+//Board rendering
 const division_size = Math.floor(Canvas_length/tic_tac_size)
 
-let moves_rendering = []
+let moves_rendering = []//related to minimax computation
 let X_to_play = true
+//game logic
 
 function setup() {
   createCanvas(Canvas_length, Canvas_length);
@@ -13,15 +14,17 @@ function setup() {
   let newGame = createButton("Start new game")
   newGame.position(Canvas_length,30)
   newGame.mousePressed(clearBoard)
+
+  var matrix_board = new TicTacBoard(tic_tac_size)
 };
 
 function draw() {
   background(220);
   drawTicTacToe()
+
   //rendering played moves
   moves_rendering.forEach(element => element())
 }
-
 
 function mouseClicked(){
   is_in_canvas = (mouseX <= Canvas_length) && (mouseY <= Canvas_length)
