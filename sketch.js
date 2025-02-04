@@ -1,11 +1,13 @@
 const Canvas_length = 400
 const tic_tac_size = 3
 const icon_buffer = 15
+
 //Board rendering
 const division_size = Math.floor(Canvas_length/tic_tac_size)
 
 let moves_rendering = []//related to minimax computation
 let X_to_play = true
+var board_array
 //game logic
 
 function setup() {
@@ -15,24 +17,72 @@ function setup() {
   newGame.position(Canvas_length,30)
   newGame.mousePressed(clearBoard)
 
-  var matrix_board = new TicTacBoard(tic_tac_size)
+  board_array = returnClearBoard(tic_tac_size)
+
 };
 
 function draw() {
   background(220);
-  drawTicTacToe()
 
+  drawTicTacToe()
   //rendering played moves
   moves_rendering.forEach(element => element())
 }
-
 function mouseClicked(){
-  is_in_canvas = (mouseX <= Canvas_length) && (mouseY <= Canvas_length)
-  if(is_in_canvas){
+
+  const is_in_canvas = (mouseX <= Canvas_length) && (mouseY <= Canvas_length)
+
+  const mouseToMatrix = (mouse_position)=> Math.floor(mouse_position / division_size)
+  const attempted_move = [mouseToMatrix(mouseX),mouseToMatrix(mouseY)]
+  if(is_in_canvas && isValidMove(attempted_move,board_array)){
     drawfunc = X_to_play ? drawX : drawO
     moves_rendering.push(drawfunc(mouseX,mouseY))
+
+    //logic
+    board_array = makeMove(attempted_move,board_array,X_to_play)
     X_to_play = !X_to_play
+
+    current_gamestate = gameState(board_array)
+
+    if(!current_gamestate.complete){
+      const computer_move = returnBestMove(board_array,X_to_play)
+      board_array = makeMove(computer_move,board_array,X_to_play)
+
+      const post_comp_gamestate = gameState(board_array)
+      if(post_comp_gamestate.complete){
+        console.log("The computer move has completed the game")
+        endstate(post_comp_gamestate)
+      }else{
+        X_to_play = !X_to_play
+        //The computer move has not finished the game and it's back to the users turn of play
+      }
+      
+    }else{
+      console.log("the user move has completed the game")
+      endstate(current_gamestate)
+    }
+    
   }
+}
+function endstate(state){
+/*
+ENDSTATE
+if won: add line to show win to moves_rendering + display text about who won
+if tied: Show that 
+*/
+  let drawText
+  if(state.won){
+    //Add the line
+    drawText = ()=>{
+      text('The winner is ' + state.winner,0,Math.floor(Canvas_length/2))
+    }
+  }else{
+    
+    drawText = ()=>{
+      text("The game is tied",0,Math.floor(Canvas_length/2))
+    }
+  }
+  moves_rendering.push(drawText)
 }
 function clearBoard(){
   moves_rendering = []

@@ -10,7 +10,6 @@ function average(array){
     })
     return sum / array.length
 }
-
 function returnClearBoard(board_dim = 3){
 /*
 returns..
@@ -18,21 +17,32 @@ returns..
 [0,0,0]
 [0,0,0]
 */
-    return new Array(board_dim).fill('').map(e => Array(board_dim).fill(0))
+    board =  new Array(board_dim).fill('').map(e => Array(board_dim).fill(0))
+    return board
+}
+function isValidMove(move,board){
+    const valid_moves =  return_move_list(board)
+    const row = valid_moves[move[0]]
+
+    return row.reduce((acc,current)=>{
+        return (row[move[1]] === current) ? true : acc
+    },false)
 }
 
 function gameState(board){
 /*
 gamestate function returns:
-"tied" if the game is tied
-"X"/"O" if the game has been one by X or O respectively
-"in-play" otherwise
+{
+    complete: boolean, 
+    won: boolean, [has the game been won]
+    winner: string, [null if invalid]
+    **win_line: [start,end]/null
+}
 */
-
     //horizontal checks + vertical checks
     let res = {}
-    for(const i=0; i< board.length; i++){
-        const current_row = board[i]
+    for(let i=0; i< board.length; i++){
+        let current_row = board[i]
         const current_col = board.map((el)=> el[i])
 
         const row_avg = average(current_row)
@@ -42,13 +52,14 @@ gamestate function returns:
             res.complete = true
             res.won = true
             res.winner = ((row_avg===1) || (col_avg==1)) ? "X" : "O"
+
             return res
         }
     }
 
     //Diagonal checks
     const down_diagonal = board.map((el,i)=>el[i])
-    const up_diagonal = board.map((el,i)=> el[(board_dim - i)-1])
+    const up_diagonal = board.map((el,i)=> el[(board.length - i)-1])
 
     const down_diag_avg = average(down_diagonal)
     const up_diag_avg = average(up_diagonal)
@@ -63,7 +74,7 @@ gamestate function returns:
     //check for if the game is tied
     game_tied = true
     board.forEach(element => {
-        if(Math.min(element) === 0){
+        if(Math.min(...element) === 0){
             game_tied = false
         }
     });
@@ -72,13 +83,15 @@ gamestate function returns:
         res.won = false
         res.winner = null
         return res
+    }else{
+        //the game is therefore still in play
+        res.complete = false
+        res.won = null
+        res.winner = null
+        return res
     }
 
-    //the game is therefore still in play
-    res.complete = false
-    res.won = null
-    res.winner = null
-    return res
+
 };
 
 function return_move_list(board){
@@ -107,7 +120,7 @@ The property contains an array of the column indeces that were empty(valid moves
     return move_list
 }
 
-function returnBestMove(board,X_to_play){
+function returnBestMove(board,X_to_play,depth = 20){
     const move_list = return_move_list(board)
     let best_move
     let best_move_eval = X_to_play ? -Infinity : Infinity
@@ -116,6 +129,7 @@ function returnBestMove(board,X_to_play){
     for(const row in move_list){
         for(const col of move_list[row]){
             const possible_move = [Number(row),col]
+
             const made_move_board = makeMove(possible_move,board,X_to_play)
 
             const prev_best_move = best_move_eval
@@ -125,6 +139,7 @@ function returnBestMove(board,X_to_play){
             }
         }
     }
+    return best_move
 }
 
 function minimax(board,depth,X_to_play){
@@ -150,12 +165,14 @@ tie/in play is evaulated to be 0
     }
 
     const move_list = return_move_list(board)
+
     if(X_to_play){
         let maxEval = -Infinity
         for(const row in move_list){
             for(const col of move_list[row]){
                 const move_to_make = [Number(row),col]
-                const made_move_board = makeMove(move_to_make,board,X_to_play)
+
+                const made_move_board = makeMove(move_to_make,board,true)
                 maxEval = Math.max(maxEval,minimax(made_move_board,depth-1,false))
             }
         }
@@ -165,7 +182,8 @@ tie/in play is evaulated to be 0
         for(const row in move_list){
             for(const col of move_list[row]){
                 const move_to_make = [Number(row),col]
-                const made_move_board = makeMove(move_to_make,board,X_to_play)
+
+                const made_move_board = makeMove(move_to_make,board,false)
                 minEval = Math.min(minEval,minimax(made_move_board,depth-1,true))
             }
         }
@@ -177,7 +195,9 @@ function makeMove(move,board,X_to_play){
 Returns the board after the move is made.
 */
     const icon = X_to_play ? 1 : -1
+    
     board[move[0]][move[1]] = icon
+
     return board
 }
 
