@@ -17,8 +17,7 @@ returns..
 [0,0,0]
 [0,0,0]
 */
-    board =  new Array(board_dim).fill('').map(e => Array(board_dim).fill(0))
-    return board
+    return new Array(board_dim).fill('').map(e => Array(board_dim).fill(0))
 }
 function isValidMove(move,board){
     const valid_moves =  return_move_list(board)
@@ -27,6 +26,7 @@ function isValidMove(move,board){
     return row.reduce((acc,current)=>{
         return (row[move[1]] === current) ? true : acc
     },false)
+    
 }
 
 function gameState(board){
@@ -136,6 +136,7 @@ function returnBestMove(board,X_to_play,depth = 20){
             best_move_eval = minimaxer(best_move_eval,minimax(made_move_board,depth-1,!X_to_play))
             if(prev_best_move != best_move_eval){
                 best_move = possible_move
+                console.log(best_move + best_move_eval)
             }
         }
     }
@@ -143,6 +144,7 @@ function returnBestMove(board,X_to_play,depth = 20){
 }
 
 function minimax(board,depth,X_to_play){
+    board = JSON.parse(JSON.stringify(board))
     let eval = (state)=>{
         if(state.complete && state.won){
             return (state.winner === "X") ? 1 : -1
@@ -183,10 +185,11 @@ tie/in play is evaulated to be 0
             for(const col of move_list[row]){
                 const move_to_make = [Number(row),col]
 
-                const made_move_board = makeMove(move_to_make,board,false)
+                const made_move_board = JSON.parse(JSON.stringify(makeMove(move_to_make,board,false)))
                 minEval = Math.min(minEval,minimax(made_move_board,depth-1,true))
             }
         }
+        return minEval
     }
 };
 
@@ -194,10 +197,11 @@ function makeMove(move,board,X_to_play){
 /*
 Returns the board after the move is made.
 */
+    working_board = JSON.parse(JSON.stringify(board))
     const icon = X_to_play ? 1 : -1
-    
-    board[move[0]][move[1]] = icon
 
-    return board
+    working_board[move[0]][move[1]] = icon
+    
+    return working_board
 }
 

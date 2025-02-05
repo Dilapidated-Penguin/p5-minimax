@@ -7,7 +7,7 @@ const division_size = Math.floor(Canvas_length/tic_tac_size)
 
 let moves_rendering = []//related to minimax computation
 let X_to_play = true
-var board_array
+var board_array = []
 //game logic
 
 function setup() {
@@ -18,7 +18,6 @@ function setup() {
   newGame.mousePressed(clearBoard)
 
   board_array = returnClearBoard(tic_tac_size)
-
 };
 
 function draw() {
@@ -33,21 +32,25 @@ function mouseClicked(){
   const is_in_canvas = (mouseX <= Canvas_length) && (mouseY <= Canvas_length)
 
   const mouseToMatrix = (mouse_position)=> Math.floor(mouse_position / division_size)
-  const attempted_move = [mouseToMatrix(mouseX),mouseToMatrix(mouseY)]
+  const attempted_move = [mouseToMatrix(mouseY),mouseToMatrix(mouseX)]
   if(is_in_canvas && isValidMove(attempted_move,board_array)){
     drawfunc = X_to_play ? drawX : drawO
     moves_rendering.push(drawfunc(mouseX,mouseY))
 
     //logic
-    board_array = makeMove(attempted_move,board_array,X_to_play)
+    
+    board_array = JSON.parse(JSON.stringify(makeMove(attempted_move,board_array,X_to_play)))
+    console.log(board_array)
     X_to_play = !X_to_play
 
     current_gamestate = gameState(board_array)
-
+    
     if(!current_gamestate.complete){
-      const computer_move = returnBestMove(board_array,X_to_play)
-      board_array = makeMove(computer_move,board_array,X_to_play)
 
+      const computer_move = returnBestMove(board_array,X_to_play)
+      
+      board_array = JSON.parse(JSON.stringify(makeMove(computer_move,board_array,X_to_play)))
+      console.log(board_array)
       const post_comp_gamestate = gameState(board_array)
       if(post_comp_gamestate.complete){
         console.log("The computer move has completed the game")
