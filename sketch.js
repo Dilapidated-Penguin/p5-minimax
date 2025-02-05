@@ -33,14 +33,17 @@ function mouseClicked(){
 
   const mouseToMatrix = (mouse_position)=> Math.floor(mouse_position / division_size)
   const attempted_move = [mouseToMatrix(mouseY),mouseToMatrix(mouseX)]
-  if(is_in_canvas && isValidMove(attempted_move,board_array)){
-    drawfunc = X_to_play ? drawX : drawO
+
+  const is_valid_move = isValidMove(attempted_move,board_array)
+  console.log(is_valid_move)
+  if(is_in_canvas && is_valid_move){
+    let drawfunc = X_to_play ? drawX : drawO
     moves_rendering.push(drawfunc(mouseX,mouseY))
 
     //logic
     
     board_array = JSON.parse(JSON.stringify(makeMove(attempted_move,board_array,X_to_play)))
-    console.log(board_array)
+
     X_to_play = !X_to_play
 
     current_gamestate = gameState(board_array)
@@ -50,7 +53,10 @@ function mouseClicked(){
       const computer_move = returnBestMove(board_array,X_to_play)
       
       board_array = JSON.parse(JSON.stringify(makeMove(computer_move,board_array,X_to_play)))
-      console.log(board_array)
+      let compdrawfunc = X_to_play ? drawX : drawO
+      const comp_position = (v)=>(v*division_size) + icon_buffer
+      moves_rendering.push(compdrawfunc(comp_position(computer_move[1]),comp_position(computer_move[0])))
+
       const post_comp_gamestate = gameState(board_array)
       if(post_comp_gamestate.complete){
         console.log("The computer move has completed the game")
@@ -89,6 +95,7 @@ if tied: Show that
 }
 function clearBoard(){
   moves_rendering = []
+  board_array = returnClearBoard(tic_tac_size)
   X_to_play = true
 }
 
@@ -115,9 +122,9 @@ function drawX(x,y) {
 }
 
 function drawO(x,y) {
-  const cord = (v) => Math.floor(v/division_size)*division_size + (division_size/2)
+  const cordO = (v) => Math.floor(v/division_size)*division_size + (division_size/2)
   function O(){
-    circle(cord(x),cord(y),division_size-icon_buffer)
+    circle(cordO(x),cordO(y),division_size-icon_buffer)
   }
   return O
 }

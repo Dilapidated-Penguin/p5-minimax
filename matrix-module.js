@@ -22,9 +22,9 @@ returns..
 function isValidMove(move,board){
     const valid_moves =  return_move_list(board)
     const row = valid_moves[move[0]]
-
+    
     return row.reduce((acc,current)=>{
-        return (row[move[1]] === current) ? true : acc
+        return (move[1] === current) ? true : acc
     },false)
     
 }
