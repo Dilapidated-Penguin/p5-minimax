@@ -72,12 +72,14 @@ gamestate function returns:
     }
 
     //check for if the game is tied
-    game_tied = true
-    board.forEach(element => {
-        if(Math.min(...element) === 0){
+    let game_tied = true
+    board.forEach(row => {
+        row = row.map(v=>Math.abs(v))
+        if(Math.min(...row) === 0){
             game_tied = false
         }
     });
+
     if(game_tied){
         res.complete = true
         res.won = false
