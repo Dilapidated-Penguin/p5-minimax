@@ -3,6 +3,7 @@ The tic tac toe board will be represented by a matrix.
 Empty spaces will be denoted with a 0, X's with a 1 and O's with -1
 This is so that we may review whether the game is won or lost by averaging the columns/rows/diagonals
 */
+var minimax_cache = new Map()
 
 function average(array){
     let sum = array.reduce((acc,current_value)=>{
@@ -131,8 +132,11 @@ The property contains an array of the column indeces that were empty(valid moves
     return move_list
 }
 
-function returnBestMove(board,X_to_play,depth = 5){
+function returnBestMove(board,X_to_play){
+    
     const move_list = return_move_list(board)
+    let depth = 10
+
     let best_move
     let best_move_eval = X_to_play ? -Infinity : Infinity
     let minimaxer = X_to_play ? Math.max : Math.min
@@ -144,10 +148,9 @@ function returnBestMove(board,X_to_play,depth = 5){
             const made_move_board = makeMove(possible_move,board,X_to_play)
 
             const prev_best_move = best_move_eval
-            best_move_eval = minimaxer(best_move_eval,minimax(made_move_board,depth-1,!X_to_play))
+            best_move_eval = minimaxer(best_move_eval,minimax(made_move_board,depth,!X_to_play))
             if(prev_best_move != best_move_eval){
                 best_move = possible_move
-                console.log(best_move + best_move_eval)
             }
         }
     }
@@ -155,11 +158,24 @@ function returnBestMove(board,X_to_play,depth = 5){
 }
 
 function minimax(board,depth,X_to_play,alpha = -Infinity,beta = Infinity){
+    const input = determinisiticStringify({
+        board: board,
+        X_to_play: X_to_play
+    })
+
+    if(minimax_cache.has(input)){
+        return minimax_cache.get(input)
+    }
+
     board = JSON.parse(JSON.stringify(board))
     let eval = (state)=>{
         if(state.complete && state.won){
-            return (state.winner === "X") ? 1 : -1
+            const evaluation = (state.winner === "X") ? 1 : -1
+
+            minimax_cache.set(input,evaluation)
+            return evaluation
         }else{
+            minimax_cache.set(input,0)
             return 0
         }
     }
@@ -174,6 +190,7 @@ tie/in play is evaulated to be 0
     const evaluation = gameState(board)
     const current_eval = eval(evaluation)
     if(evaluation.complete || (depth === 0)){
+        minimax_cache.set(input,current_eval)
         return current_eval
     }
 
@@ -198,6 +215,7 @@ tie/in play is evaulated to be 0
                 break
             }
         }
+        minimax_cache.set(input,maxEval)
         return maxEval
     }else{
         let minEval = Infinity
@@ -218,10 +236,35 @@ tie/in play is evaulated to be 0
                 break
             }
         }
+        minimax_cache.set(input,minEval)
         return minEval
     }
 };
 
+function determinisiticStringify(input){
+/*
+to compare identical input objects of different reference, a determinisitic stringify is necessary
+in order to deal with the 2D array the function 
+*/
+    return JSON.stringify(inputSort(input))
+}
+function inputSort(unsorted_item){
+    if(Array.isArray(unsorted_item)){
+        return unsorted_item.map(inputSort)
+    }else{
+        if((unsorted_item !== null) && (typeof unsorted_item === 'object')){
+            const keys = Object.keys(unsorted_item)
+            return keys
+                .sort()
+                .reduce((obj,key)=>{
+                    obj[key] = inputSort(unsorted_item[key])
+                    return obj
+                },{})
+        }
+        //
+        return unsorted_item
+    }
+}
 function makeMove(move,board,X_to_play){
 /*
 Returns the board after the move is made.

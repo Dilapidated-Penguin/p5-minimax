@@ -2,7 +2,6 @@ const Canvas_length = 400
 const tic_tac_size = 3
 const icon_buffer = 15
 
-const TEXTSIZE = 30
 const STROKEWEIGHT = 15
 //Board rendering
 const division_size = Math.floor(Canvas_length/tic_tac_size)
@@ -38,43 +37,43 @@ function mouseClicked(){
   const mouseToMatrix = (mouse_position)=> Math.floor(mouse_position / division_size)
   const attempted_move = [mouseToMatrix(mouseY),mouseToMatrix(mouseX)]
 
-  const is_valid_move = isValidMove(attempted_move,board_array)
-  console.log(is_valid_move)
-  if(is_in_canvas && is_valid_move){
-    let drawfunc = X_to_play ? drawX : drawO
-    moves_rendering.push(drawfunc(mouseX,mouseY))
+  if(is_in_canvas){
+    const is_valid_move = isValidMove(attempted_move,board_array)
 
-    //logic
-    
-    board_array = JSON.parse(JSON.stringify(makeMove(attempted_move,board_array,X_to_play)))
-
-    X_to_play = !X_to_play
-
-    current_gamestate = gameState(board_array)
-    
-    if(!current_gamestate.complete){
-
-      const computer_move = returnBestMove(board_array,X_to_play)
+    if(is_valid_move){
+      let drawfunc = X_to_play ? drawX : drawO
+      moves_rendering.push(drawfunc(mouseX,mouseY))
+  
+      //logic
       
-      board_array = JSON.parse(JSON.stringify(makeMove(computer_move,board_array,X_to_play)))
-      let compdrawfunc = X_to_play ? drawX : drawO
-      const comp_position = (v)=>(v*division_size) + icon_buffer
-      moves_rendering.push(compdrawfunc(comp_position(computer_move[1]),comp_position(computer_move[0])))
-
-      const post_comp_gamestate = gameState(board_array)
-      if(post_comp_gamestate.complete){
-        console.log("The computer move has completed the game")
-        endstate(post_comp_gamestate)
+      board_array = JSON.parse(JSON.stringify(makeMove(attempted_move,board_array,X_to_play)))
+  
+      X_to_play = !X_to_play
+  
+      current_gamestate = gameState(board_array)
+      
+      if(!current_gamestate.complete){
+  
+        const computer_move = returnBestMove(board_array,X_to_play)
+        
+        board_array = JSON.parse(JSON.stringify(makeMove(computer_move,board_array,X_to_play)))
+        let compdrawfunc = X_to_play ? drawX : drawO
+        const comp_position = (v)=>(v*division_size) + icon_buffer
+  
+        moves_rendering.push(compdrawfunc(comp_position(computer_move[1]),comp_position(computer_move[0])))
+  
+        const post_comp_gamestate = gameState(board_array)
+        if(post_comp_gamestate.complete){
+          endstate(post_comp_gamestate)
+        }else{
+          X_to_play = !X_to_play
+          //The computer move has not finished the game and it's back to the users turn of play
+        }
+        
       }else{
-        X_to_play = !X_to_play
-        //The computer move has not finished the game and it's back to the users turn of play
+        endstate(current_gamestate)
       }
-      
-    }else{
-      console.log("the user move has completed the game")
-      endstate(current_gamestate)
     }
-    
   }
 }
 //win_indicator(line_flag)(index) --> function to add to move_rendering
@@ -127,24 +126,14 @@ ENDSTATE
 if won: add line to show win to moves_rendering + display text about who won
 if tied: Show that 
 */
-  let drawText
-  const text_location = Math.floor(Canvas_length/2)
+
+  //let drawText
+  //const text_location = Math.floor(Canvas_length/2)
   if(state.won){
     //Add the win text + Add the line denoting the win
-    drawText = ()=>{
-      textSize(TEXTSIZE);
-      textStyle(BOLD);
-      text('The winner is ' + state.winner,0,text_location)
-    }
     moves_rendering.push(win_indicator(state.win_line.flag)(state.win_line.index))
-  }else{
-    drawText = ()=>{
-      textSize(TEXTSIZE);
-      textStyle(BOLD);
-      text("The game is tied",0,text_location)
-    }
   }
-  moves_rendering.push(drawText)
+ // moves_rendering.push(drawText)
 }
 function clearBoard(){
   moves_rendering = []
