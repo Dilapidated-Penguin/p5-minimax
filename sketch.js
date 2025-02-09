@@ -112,7 +112,7 @@ function win_indicator(line_flag){
           line(diag_buffer,end_cord,end_cord,diag_buffer)
         }
       }
-    case 'ld':
+    case 'dd':
       return function(index){
         return ()=>{
           strokeWeight(STROKEWEIGHT);

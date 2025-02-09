@@ -154,7 +154,7 @@ function returnBestMove(board,X_to_play,depth = 5){
     return best_move
 }
 
-function minimax(board,depth,X_to_play){
+function minimax(board,depth,X_to_play,alpha = -Infinity,beta = Infinity){
     board = JSON.parse(JSON.stringify(board))
     let eval = (state)=>{
         if(state.complete && state.won){
@@ -186,7 +186,16 @@ tie/in play is evaulated to be 0
                 const move_to_make = [Number(row),col]
 
                 const made_move_board = makeMove(move_to_make,board,true)
-                maxEval = Math.max(maxEval,minimax(made_move_board,depth-1,false))
+                const eval = minimax(made_move_board,depth-1,false,alpha,beta)
+                maxEval = Math.max(maxEval,eval)
+                //alpha-beta pruning
+                alpha = Math.max(alpha,eval)
+                if(beta <= alpha){
+                    break
+                }
+            }
+            if(beta <= alpha){
+                break
             }
         }
         return maxEval
@@ -197,7 +206,16 @@ tie/in play is evaulated to be 0
                 const move_to_make = [Number(row),col]
 
                 const made_move_board = JSON.parse(JSON.stringify(makeMove(move_to_make,board,false)))
-                minEval = Math.min(minEval,minimax(made_move_board,depth-1,true))
+                const eval = minimax(made_move_board,depth-1,true,alpha,beta)
+                minEval = Math.min(minEval,eval)
+                //alpha-beta pruning
+                beta = Math.min(beta,eval)
+                if(beta <= alpha){
+                    break
+                }
+            }
+            if(beta <= alpha){
+                break
             }
         }
         return minEval
