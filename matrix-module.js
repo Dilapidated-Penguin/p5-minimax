@@ -52,7 +52,10 @@ gamestate function returns:
             res.complete = true
             res.won = true
             res.winner = ((row_avg===1) || (col_avg==1)) ? "X" : "O"
-
+            res.win_line = {
+                flag: (Math.abs(row_avg)===1) ? "R" : "C",
+                index: i
+            }
             return res
         }
     }
@@ -68,6 +71,10 @@ gamestate function returns:
         res.complete = true
         res.won = true
         res.winner = ((down_diag_avg===1) || (up_diag_avg===1)) ? "X" : "O"
+        res.win_line = {
+            flag: (Math.abs(down_diag_avg)===1) ? "dd" : "ud",
+            index: null
+        }
         return res
     }
 
@@ -84,12 +91,14 @@ gamestate function returns:
         res.complete = true
         res.won = false
         res.winner = null
+        res.win_line = null
         return res
     }else{
         //the game is therefore still in play
         res.complete = false
         res.won = null
         res.winner = null
+        res.win_line = null
         return res
     }
 
@@ -122,7 +131,7 @@ The property contains an array of the column indeces that were empty(valid moves
     return move_list
 }
 
-function returnBestMove(board,X_to_play,depth = 20){
+function returnBestMove(board,X_to_play,depth = 5){
     const move_list = return_move_list(board)
     let best_move
     let best_move_eval = X_to_play ? -Infinity : Infinity
@@ -206,4 +215,3 @@ Returns the board after the move is made.
     
     return working_board
 }
-

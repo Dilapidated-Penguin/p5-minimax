@@ -2,13 +2,17 @@ const Canvas_length = 400
 const tic_tac_size = 3
 const icon_buffer = 15
 
+const TEXTSIZE = 30
+const STROKEWEIGHT = 15
 //Board rendering
 const division_size = Math.floor(Canvas_length/tic_tac_size)
+const buffer = Math.floor(division_size/2)
 
-let moves_rendering = []//related to minimax computation
+let moves_rendering = []
+//game logic
 let X_to_play = true
 var board_array = []
-//game logic
+
 
 function setup() {
   createCanvas(Canvas_length, Canvas_length);
@@ -73,6 +77,50 @@ function mouseClicked(){
     
   }
 }
+//win_indicator(line_flag)(index) --> function to add to move_rendering
+function win_indicator(line_flag){
+  const diag_buffer = Math.floor(buffer/Math.sqrt(2))
+  const end_cord = Canvas_length-diag_buffer
+
+  switch(line_flag){
+    case 'R':
+      return function(index){
+        return ()=>{
+          strokeWeight(STROKEWEIGHT);
+
+          const y_cord = (index*division_size) + buffer
+          const x_start = buffer
+          const x_end = Canvas_length - x_start
+          line(x_start,y_cord,x_end,y_cord)              
+        }
+      }
+    case 'C':
+      return function(index){
+        return ()=>{
+          strokeWeight(STROKEWEIGHT);
+
+          const x_cord = (index*division_size) + buffer
+          const y_start = buffer
+          const y_end = Canvas_length - buffer
+          line(x_cord,y_start,x_cord,y_end)              
+        }
+      }
+    case 'ud':
+      return function(index){
+        return ()=>{
+          strokeWeight(STROKEWEIGHT);
+          line(diag_buffer,end_cord,end_cord,diag_buffer)
+        }
+      }
+    case 'ld':
+      return function(index){
+        return ()=>{
+          strokeWeight(STROKEWEIGHT);
+          line(diag_buffer,diag_buffer,end_cord,end_cord)
+        }
+      }
+  }
+}
 function endstate(state){
 /*
 ENDSTATE
@@ -80,15 +128,20 @@ if won: add line to show win to moves_rendering + display text about who won
 if tied: Show that 
 */
   let drawText
+  const text_location = Math.floor(Canvas_length/2)
   if(state.won){
-    //Add the line
+    //Add the win text + Add the line denoting the win
     drawText = ()=>{
-      text('The winner is ' + state.winner,0,Math.floor(Canvas_length/2))
+      textSize(TEXTSIZE);
+      textStyle(BOLD);
+      text('The winner is ' + state.winner,0,text_location)
     }
+    moves_rendering.push(win_indicator(state.win_line.flag)(state.win_line.index))
   }else{
-    
     drawText = ()=>{
-      text("The game is tied",0,Math.floor(Canvas_length/2))
+      textSize(TEXTSIZE);
+      textStyle(BOLD);
+      text("The game is tied",0,text_location)
     }
   }
   moves_rendering.push(drawText)
