@@ -135,6 +135,7 @@ The property contains an array of the column indeces that were empty(valid moves
 function returnBestMove(board,X_to_play){
     
     const move_list = return_move_list(board)
+    console.log(move_list)
     let depth = 10
 
     let best_move
@@ -144,7 +145,7 @@ function returnBestMove(board,X_to_play){
     for(const row in move_list){
         for(const col of move_list[row]){
             const possible_move = [Number(row),col]
-
+            
             const made_move_board = makeMove(possible_move,board,X_to_play)
 
             const prev_best_move = best_move_eval
@@ -156,10 +157,58 @@ function returnBestMove(board,X_to_play){
     }
     return best_move
 }
+function deterministicOrientation(board){
+/*
+in order to make our memoization of the minimax algorithms orientation agnostic
+we need a conventional orientation: In this case it'll be the lexicographically smallest rotation
+    
+the function returns
+a string representation of the standard orientations
+*/
+    const lexi_min = (...strings)=>{
+        return strings.reduce((min,curr)=>{
+            return (curr < min) ? curr : min
+        })
+    }
+
+    const board_90 = rotateBoard(board)
+    const board_180 = rotateBoard(board_90)
+    const board_270 = rotateBoard(board_180)
+
+    //get the strings
+    const board_string = JSON.stringify(board)
+    const board_90_string = JSON.stringify(board_90)  
+    const board_180_string = JSON.stringify(board_180) 
+    const board_270_string = JSON.stringify(board_270)
+
+    return lexi_min(board_string,board_90_string,board_180_string,board_270_string)
+}
+function newRef(board){
+    return JSON.parse(JSON.stringify(board))
+}
+function rotateBoard(board){
+    //Step 1: Transpose (O(N^2))
+    board = newRef(board)
+
+    const dim = board.length
+    for(let i = 0; i < dim; i++){
+        for(let j = i+1; j < dim; j++){
+            //[board[i][j], board[j][i]] = [board[j][i], board[i][j]]
+            const buffer = board[i][j]
+            board[i][j] = board[j][i]
+            board[j][i] = buffer
+        }
+    }
+    
+    //Step 2: Reverse the rows(O(N))
+    board.forEach((row) => row.reverse());
+
+    return board
+}
 
 function minimax(board,depth,X_to_play,alpha = -Infinity,beta = Infinity){
     const input = determinisiticStringify({
-        board: board,
+        board: deterministicOrientation(board),
         X_to_play: X_to_play
     })
 
@@ -167,7 +216,7 @@ function minimax(board,depth,X_to_play,alpha = -Infinity,beta = Infinity){
         return minimax_cache.get(input)
     }
 
-    board = JSON.parse(JSON.stringify(board))
+    board = newRef(board)
     let eval = (state)=>{
         if(state.complete && state.won){
             const evaluation = (state.winner === "X") ? 1 : -1
@@ -223,7 +272,7 @@ tie/in play is evaulated to be 0
             for(const col of move_list[row]){
                 const move_to_make = [Number(row),col]
 
-                const made_move_board = JSON.parse(JSON.stringify(makeMove(move_to_make,board,false)))
+                const made_move_board = newRef(makeMove(move_to_make,board,false))
                 const eval = minimax(made_move_board,depth-1,true,alpha,beta)
                 minEval = Math.min(minEval,eval)
                 //alpha-beta pruning
@@ -269,7 +318,7 @@ function makeMove(move,board,X_to_play){
 /*
 Returns the board after the move is made.
 */
-    working_board = JSON.parse(JSON.stringify(board))
+    working_board = newRef(board)
     const icon = X_to_play ? 1 : -1
 
     working_board[move[0]][move[1]] = icon
