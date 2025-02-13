@@ -135,9 +135,8 @@ The property contains an array of the column indeces that were empty(valid moves
 function returnBestMove(board,X_to_play){
     
     const move_list = return_move_list(board)
-    console.log(move_list)
-    let depth = 10
-
+    let depth = 9
+    
     let best_move
     let best_move_eval = X_to_play ? -Infinity : Infinity
     let minimaxer = X_to_play ? Math.max : Math.min
@@ -145,13 +144,17 @@ function returnBestMove(board,X_to_play){
     for(const row in move_list){
         for(const col of move_list[row]){
             const possible_move = [Number(row),col]
-            
+
             const made_move_board = makeMove(possible_move,board,X_to_play)
 
             const prev_best_move = best_move_eval
-            best_move_eval = minimaxer(best_move_eval,minimax(made_move_board,depth,!X_to_play))
+            
+            const eval = minimax(made_move_board,depth,!X_to_play)
+            
+            best_move_eval = minimaxer(best_move_eval,eval)
             if(prev_best_move != best_move_eval){
                 best_move = possible_move
+
             }
         }
     }
@@ -180,7 +183,7 @@ a string representation of the standard orientations
     const board_90_string = JSON.stringify(board_90)  
     const board_180_string = JSON.stringify(board_180) 
     const board_270_string = JSON.stringify(board_270)
-
+    
     return lexi_min(board_string,board_90_string,board_180_string,board_270_string)
 }
 function newRef(board){
@@ -188,30 +191,32 @@ function newRef(board){
 }
 function rotateBoard(board){
     //Step 1: Transpose (O(N^2))
-    board = newRef(board)
-
-    const dim = board.length
+    const rotated = newRef(board)
+    //console.log(rotated)
+    const dim = rotated.length
+    
     for(let i = 0; i < dim; i++){
         for(let j = i+1; j < dim; j++){
-            //[board[i][j], board[j][i]] = [board[j][i], board[i][j]]
-            const buffer = board[i][j]
-            board[i][j] = board[j][i]
-            board[j][i] = buffer
+            //[board[i][j], board[j][i]] = [board[j][i], board[i][j]
+            const buffer = rotated[i][j]
+            rotated[i][j] = rotated[j][i]
+            rotated[j][i] = buffer
         }
     }
     
     //Step 2: Reverse the rows(O(N))
-    board.forEach((row) => row.reverse());
-
-    return board
+    //console.log(rotated)
+    rotated.forEach((row) => row.reverse());
+    //console.log(rotated)
+    return rotated
 }
 
-function minimax(board,depth,X_to_play,alpha = -Infinity,beta = Infinity){
+function minimax(board,depth,X_to_play){
     const input = determinisiticStringify({
         board: deterministicOrientation(board),
         X_to_play: X_to_play
     })
-
+    
     if(minimax_cache.has(input)){
         return minimax_cache.get(input)
     }
@@ -252,17 +257,10 @@ tie/in play is evaulated to be 0
                 const move_to_make = [Number(row),col]
 
                 const made_move_board = makeMove(move_to_make,board,true)
-                const eval = minimax(made_move_board,depth-1,false,alpha,beta)
+                const eval = minimax(made_move_board,depth-1,false)
                 maxEval = Math.max(maxEval,eval)
-                //alpha-beta pruning
-                alpha = Math.max(alpha,eval)
-                if(beta <= alpha){
-                    break
-                }
             }
-            if(beta <= alpha){
-                break
-            }
+
         }
         minimax_cache.set(input,maxEval)
         return maxEval
@@ -272,18 +270,11 @@ tie/in play is evaulated to be 0
             for(const col of move_list[row]){
                 const move_to_make = [Number(row),col]
 
-                const made_move_board = newRef(makeMove(move_to_make,board,false))
-                const eval = minimax(made_move_board,depth-1,true,alpha,beta)
+                const made_move_board = makeMove(move_to_make,board,false)
+                const eval = minimax(made_move_board,depth-1,true)
                 minEval = Math.min(minEval,eval)
-                //alpha-beta pruning
-                beta = Math.min(beta,eval)
-                if(beta <= alpha){
-                    break
-                }
             }
-            if(beta <= alpha){
-                break
-            }
+
         }
         minimax_cache.set(input,minEval)
         return minEval
