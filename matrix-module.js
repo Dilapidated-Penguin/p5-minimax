@@ -211,7 +211,7 @@ function rotateBoard(board){
     return rotated
 }
 
-function minimax(board,depth,X_to_play){
+function minimax(board,depth,X_to_play,alpha = -Infinity,beta = Infinity){
     const input = determinisiticStringify({
         board: deterministicOrientation(board),
         X_to_play: X_to_play
@@ -259,8 +259,14 @@ tie/in play is evaulated to be 0
                 const made_move_board = makeMove(move_to_make,board,true)
                 const eval = minimax(made_move_board,depth-1,false)
                 maxEval = Math.max(maxEval,eval)
+                alpha = Math.max(alpha,maxEval)
+                if(beta<=alpha){
+                    break;
+                }
             }
-
+            if(beta<=alpha){
+                break;
+            }
         }
         minimax_cache.set(input,maxEval)
         return maxEval
@@ -270,11 +276,17 @@ tie/in play is evaulated to be 0
             for(const col of move_list[row]){
                 const move_to_make = [Number(row),col]
 
-                const made_move_board = makeMove(move_to_make,board,false)
+                const made_move_board = makeMove(move_to_make,board,false,alpha,beta)
                 const eval = minimax(made_move_board,depth-1,true)
                 minEval = Math.min(minEval,eval)
+                beta = Math.min(beta,minEval)
+                if(beta <= alpha){
+                    break;
+                }
             }
-
+            if(beta<=alpha){
+                break;
+            }
         }
         minimax_cache.set(input,minEval)
         return minEval
