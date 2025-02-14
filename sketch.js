@@ -14,7 +14,7 @@ var board_array = []
 
 
 function setup() {
-  createCanvas(Canvas_length, Canvas_length);
+  createCanvas(Canvas_length + 400, Canvas_length);
 
   let newGame = createButton("Start new game")
   newGame.position(Canvas_length,30)
@@ -44,9 +44,8 @@ function mouseClicked(){
       let drawfunc = X_to_play ? drawX : drawO
       moves_rendering.push(drawfunc(mouseX,mouseY))
   
-      //logic
-      
-      board_array = JSON.parse(JSON.stringify(makeMove(attempted_move,board_array,X_to_play)))
+
+      board_array = makeMove(attempted_move,board_array,X_to_play)
   
       X_to_play = !X_to_play
   
@@ -56,7 +55,7 @@ function mouseClicked(){
   
         const computer_move = returnBestMove(board_array,X_to_play)
         
-        board_array = JSON.parse(JSON.stringify(makeMove(computer_move,board_array,X_to_play)))
+        board_array = makeMove(computer_move,board_array,X_to_play)
         let compdrawfunc = X_to_play ? drawX : drawO
         const comp_position = (v)=>(v*division_size) + icon_buffer
   
@@ -76,8 +75,9 @@ function mouseClicked(){
     }
   }
 }
-//win_indicator(line_flag)(index) --> function to add to move_rendering
+
 function win_indicator(line_flag){
+  //win_indicator(line_flag)(index) --> function to add to move_rendering
   const diag_buffer = Math.floor(buffer/Math.sqrt(2))
   const end_cord = Canvas_length-diag_buffer
 
@@ -135,6 +135,7 @@ if tied: Show that
   }
  // moves_rendering.push(drawText)
 }
+
 function clearBoard(){
   moves_rendering = []
   board_array = returnClearBoard(tic_tac_size)
@@ -145,7 +146,7 @@ function drawTicTacToe(weight = 3) {
   //stroke('magenta');
   strokeWeight(weight);
   let j = 1
-  while(j<=tic_tac_size){
+  while(j<tic_tac_size){
     let cord = j*division_size
     line(cord,0,cord,Canvas_length)
     line(0,cord,Canvas_length,cord)
