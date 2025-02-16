@@ -5,6 +5,8 @@ This is so that we may review whether the game is won or lost by averaging the c
 */
 var minimax_cache = new Map()
 
+let cache_accessed = 0,outputs_cached=0, branches_pruned = 0
+
 function gameState(board){
 /*
 gamestate function returns:
@@ -108,7 +110,8 @@ The property contains an array of the column indeces that were empty(valid moves
 }
 
 function returnBestMove(board,X_to_play){
-    
+    cache_accessed,outputs_cached,branches_pruned = 0
+
     const move_list = return_move_list(board)
     let depth = (board.length**2)
     
@@ -133,7 +136,12 @@ function returnBestMove(board,X_to_play){
             }
         }
     }
-    return best_move
+    
+    return [best_move,{
+        cache_accessed: cache_accessed,
+        outputs_cached: outputs_cached,
+        branches_pruned: branches_pruned
+    }]
 }
 function deterministicOrientation(board){
 /*
@@ -171,11 +179,13 @@ function minimax(board,depth,X_to_play,alpha = -Infinity,beta = Infinity){
     })
     
     if(minimax_cache.has(input)){
+        cache_accessed++
         return minimax_cache.get(input)
     }
 
     board = newRef(board)
     let eval = (state)=>{
+        outputs_cached++
         if(state.complete && state.won){
             const evaluation = (state.winner === "X") ? 1 : -1
 
@@ -197,6 +207,7 @@ tie/in play is evaulated to be 0
     const evaluation = gameState(board)
     const current_eval = eval(evaluation)
     if(evaluation.complete || (depth === 0)){
+        outputs_cached++
         minimax_cache.set(input,current_eval)
         return current_eval
     }
@@ -218,9 +229,11 @@ tie/in play is evaulated to be 0
                 }
             }
             if(beta<=alpha){
+                branches_pruned++
                 break;
             }
         }
+        outputs_cached++
         minimax_cache.set(input,maxEval)
         return maxEval
     }else{
@@ -238,9 +251,11 @@ tie/in play is evaulated to be 0
                 }
             }
             if(beta<=alpha){
+                branches_pruned++
                 break;
             }
         }
+        outputs_cached++
         minimax_cache.set(input,minEval)
         return minEval
     }

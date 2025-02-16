@@ -11,6 +11,24 @@ let moves_rendering = []
 //game logic
 let X_to_play = true
 var board_array = []
+let user_to_play
+
+//Contains all the messages
+let pseudo_console = []
+let vertical_coordinate = []
+const addToPseudo = (message) =>{
+  const entry_num = pseudo_console.length
+  vertical_coordinate.push(50 + entry_num*3)
+  pseudo_console.push(text(message,Canvas_length+100,vertical_coordinate[vertical_coordinate.length-1]))
+
+  if(pseudo_console.length <= 10){
+    pseudo_console.shift()
+    vertical_coordinate.shift()
+  }
+}
+
+//
+const worker = new Worker('worker.js');
 
 
 function setup() {
@@ -19,7 +37,7 @@ function setup() {
   let newGame = createButton("Start new game")
   newGame.position(Canvas_length,30)
   newGame.mousePressed(clearBoard)
-
+  user_to_play = true
   board_array = returnClearBoard(tic_tac_size)
 };
 
@@ -28,6 +46,7 @@ function draw() {
 
   drawTicTacToe()
   //rendering played moves
+  moves_rendering.push(...pseudo_console)
   moves_rendering.forEach(element => element())
 }
 function mouseClicked(){
@@ -37,38 +56,26 @@ function mouseClicked(){
   const mouseToMatrix = (mouse_position)=> Math.floor(mouse_position / division_size)
   const attempted_move = [mouseToMatrix(mouseY),mouseToMatrix(mouseX)]
 
-  if(is_in_canvas){
+  if(is_in_canvas && user_to_play){
     const is_valid_move = isValidMove(attempted_move,board_array)
 
     if(is_valid_move){
       let drawfunc = X_to_play ? drawX : drawO
       moves_rendering.push(drawfunc(mouseX,mouseY))
   
-
       board_array = makeMove(attempted_move,board_array,X_to_play)
   
       X_to_play = !X_to_play
-  
-      current_gamestate = gameState(board_array)
-      
+      user_to_play = false
+
+      const current_gamestate = gameState(board_array)
+
       if(!current_gamestate.complete){
-  
-        const computer_move = returnBestMove(board_array,X_to_play)
-        
-        board_array = makeMove(computer_move,board_array,X_to_play)
-        let compdrawfunc = X_to_play ? drawX : drawO
-        const comp_position = (v)=>(v*division_size) + icon_buffer
-  
-        moves_rendering.push(compdrawfunc(comp_position(computer_move[1]),comp_position(computer_move[0])))
-  
-        const post_comp_gamestate = gameState(board_array)
-        if(post_comp_gamestate.complete){
-          endstate(post_comp_gamestate)
-        }else{
-          X_to_play = !X_to_play
-          //The computer move has not finished the game and it's back to the users turn of play
-        }
-        
+        //Retrieves the best move in a seperate thread
+        worker.postMessage([board_array, X_to_play]);
+
+        //Loading
+
       }else{
         endstate(current_gamestate)
       }
@@ -76,6 +83,29 @@ function mouseClicked(){
   }
 }
 
+worker.onmessage = function(event) {
+  [computer_move,data] = event.data
+
+  board_array = makeMove(computer_move,board_array,X_to_play)
+
+  let compdrawfunc = X_to_play ? drawX : drawO
+  const comp_position = (v)=>(v*division_size) + icon_buffer
+
+  moves_rendering.push(compdrawfunc(comp_position(computer_move[1]),comp_position(computer_move[0])))
+  
+  const post_comp_gamestate = gameState(board_array)
+  if(post_comp_gamestate.complete){
+    endstate(post_comp_gamestate)
+  }else{
+    X_to_play = !X_to_play
+    //The computer move has not finished the game and it's back to the users turn of play
+  }
+
+  user_to_play = true
+  //Stop gif
+  //Add the information to the pseudo console
+};
+//############################################
 function win_indicator(line_flag){
   //win_indicator(line_flag)(index) --> function to add to move_rendering
   const diag_buffer = Math.floor(buffer/Math.sqrt(2))
@@ -140,6 +170,7 @@ function clearBoard(){
   moves_rendering = []
   board_array = returnClearBoard(tic_tac_size)
   X_to_play = true
+  user_to_play = true
 }
 
 function drawTicTacToe(weight = 3) {
