@@ -5,7 +5,7 @@ This is so that we may review whether the game is won or lost by averaging the c
 */
 var minimax_cache = new Map()
 
-let cache_accessed = 0,outputs_cached=0, branches_pruned = 0
+var cache_accessed = 0,outputs_cached=0, branches_pruned = 0
 
 function gameState(board){
 /*
@@ -110,7 +110,9 @@ The property contains an array of the column indeces that were empty(valid moves
 }
 
 function returnBestMove(board,X_to_play){
-    cache_accessed,outputs_cached,branches_pruned = 0
+    cache_accessed = 0
+    outputs_cached = 0
+    branches_pruned = 0
 
     const move_list = return_move_list(board)
     let depth = (board.length**2)
@@ -132,7 +134,6 @@ function returnBestMove(board,X_to_play){
             best_move_eval = minimaxer(best_move_eval,eval)
             if(prev_best_move != best_move_eval){
                 best_move = possible_move
-
             }
         }
     }
@@ -179,6 +180,7 @@ function minimax(board,depth,X_to_play,alpha = -Infinity,beta = Infinity){
     })
     
     if(minimax_cache.has(input)){
+
         cache_accessed++
         return minimax_cache.get(input)
     }
@@ -221,16 +223,9 @@ tie/in play is evaulated to be 0
                 const move_to_make = [Number(row),col]
 
                 const made_move_board = makeMove(move_to_make,board,true)
-                const eval = minimax(made_move_board,depth-1,false)
+                const eval = minimax(made_move_board,depth-1,false,alpha,beta)
                 maxEval = Math.max(maxEval,eval)
                 alpha = Math.max(alpha,maxEval)
-                if(beta<=alpha){
-                    break;
-                }
-            }
-            if(beta<=alpha){
-                branches_pruned++
-                break;
             }
         }
         outputs_cached++
@@ -242,17 +237,9 @@ tie/in play is evaulated to be 0
             for(const col of move_list[row]){
                 const move_to_make = [Number(row),col]
 
-                const made_move_board = makeMove(move_to_make,board,false,alpha,beta)
+                const made_move_board = makeMove(move_to_make,board,false,beta,alpha)
                 const eval = minimax(made_move_board,depth-1,true)
                 minEval = Math.min(minEval,eval)
-                beta = Math.min(beta,minEval)
-                if(beta <= alpha){
-                    break;
-                }
-            }
-            if(beta<=alpha){
-                branches_pruned++
-                break;
             }
         }
         outputs_cached++

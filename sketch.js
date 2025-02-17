@@ -15,15 +15,11 @@ let user_to_play
 
 //Contains all the messages
 let pseudo_console = []
-let vertical_coordinate = []
 const addToPseudo = (message) =>{
-  const entry_num = pseudo_console.length
-  vertical_coordinate.push(50 + entry_num*3)
-  pseudo_console.push(text(message,Canvas_length+100,vertical_coordinate[vertical_coordinate.length-1]))
-
-  if(pseudo_console.length <= 10){
+  pseudo_console.push(message)
+  
+  if(pseudo_console.length >= 10){
     pseudo_console.shift()
-    vertical_coordinate.shift()
   }
 }
 
@@ -45,9 +41,14 @@ function draw() {
   background(220);
 
   drawTicTacToe()
-  //rendering played moves
-  moves_rendering.push(...pseudo_console)
+  //rendering the moves played
   moves_rendering.forEach(element => element())
+
+  //render the console:
+  for(let i = 0; i<pseudo_console.length;i++){
+    let y = 100 + i*19
+    text(pseudo_console[i],Canvas_length+15,y)
+  }
 }
 function mouseClicked(){
 
@@ -87,6 +88,12 @@ worker.onmessage = function(event) {
   [computer_move,data] = event.data
 
   board_array = makeMove(computer_move,board_array,X_to_play)
+  //Add the information to the pseudo console
+  addToPseudo(`Move found in ${data.elapsed}ms`)
+  addToPseudo(`${data.branches_pruned} branches were pruned using alpha-beta pruning`)
+  addToPseudo(`the orientation agnostic cache of minimax outputs was accessed ${data.cache_accessed} times`)
+  addToPseudo(`${data.outputs_cached} new minimax answers were cached`)
+
 
   let compdrawfunc = X_to_play ? drawX : drawO
   const comp_position = (v)=>(v*division_size) + icon_buffer
@@ -103,7 +110,6 @@ worker.onmessage = function(event) {
 
   user_to_play = true
   //Stop gif
-  //Add the information to the pseudo console
 };
 //############################################
 function win_indicator(line_flag){
@@ -156,18 +162,22 @@ ENDSTATE
 if won: add line to show win to moves_rendering + display text about who won
 if tied: Show that 
 */
-
-  //let drawText
-  //const text_location = Math.floor(Canvas_length/2)
+  textStyle(BOLD)
   if(state.won){
     //Add the win text + Add the line denoting the win
+    addToPseudo(`${state.winner} has won the game`)
     moves_rendering.push(win_indicator(state.win_line.flag)(state.win_line.index))
+  }else{
+    addToPseudo(`The game has ended in a tied`)
   }
- // moves_rendering.push(drawText)
+
+  user_to_play = false
+  textStyle(NORMAL)
 }
 
 function clearBoard(){
   moves_rendering = []
+  pseudo_console = []
   board_array = returnClearBoard(tic_tac_size)
   X_to_play = true
   user_to_play = true
