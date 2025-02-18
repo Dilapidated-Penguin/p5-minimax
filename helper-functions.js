@@ -66,3 +66,4 @@ function isValidMove(move,board){
     },false)
     
 }
+

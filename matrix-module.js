@@ -173,14 +173,13 @@ a string representation of the standard orientations
 
 
 
-function minimax(board,depth,X_to_play,alpha = -Infinity,beta = Infinity){
+function minimax(board,depth,X_to_play){
     const input = determinisiticStringify({
         board: deterministicOrientation(board),
         X_to_play: X_to_play
     })
     
     if(minimax_cache.has(input)){
-
         cache_accessed++
         return minimax_cache.get(input)
     }
@@ -223,9 +222,8 @@ tie/in play is evaulated to be 0
                 const move_to_make = [Number(row),col]
 
                 const made_move_board = makeMove(move_to_make,board,true)
-                const eval = minimax(made_move_board,depth-1,false,alpha,beta)
+                const eval = minimax(made_move_board,depth-1,false)
                 maxEval = Math.max(maxEval,eval)
-                alpha = Math.max(alpha,maxEval)
             }
         }
         outputs_cached++
@@ -237,7 +235,7 @@ tie/in play is evaulated to be 0
             for(const col of move_list[row]){
                 const move_to_make = [Number(row),col]
 
-                const made_move_board = makeMove(move_to_make,board,false,beta,alpha)
+                const made_move_board = makeMove(move_to_make,board,false)
                 const eval = minimax(made_move_board,depth-1,true)
                 minEval = Math.min(minEval,eval)
             }

@@ -13,9 +13,13 @@ let X_to_play = true
 var board_array = []
 let user_to_play
 
+//loading animation
+let loading_animation = false
+let k=0,m=0
+
 //Contains all the messages
 let pseudo_console = []
-const addToPseudo = (message) =>{
+function addToPseudo(message){
   pseudo_console.push(message)
   
   if(pseudo_console.length >= 10){
@@ -26,9 +30,8 @@ const addToPseudo = (message) =>{
 //
 const worker = new Worker('worker.js');
 
-
 function setup() {
-  createCanvas(Canvas_length + 400, Canvas_length);
+  createCanvas(Canvas_length + 450, Canvas_length);
 
   let newGame = createButton("Start new game")
   newGame.position(Canvas_length,30)
@@ -49,6 +52,27 @@ function draw() {
     let y = 100 + i*19
     text(pseudo_console[i],Canvas_length+15,y)
   }
+
+  //loading animation: Loading animation by black
+  if(loading_animation){
+    //fill(0);
+    const x_cooridinate = Canvas_length +160
+    const y_coordinate = 40
+    ellipse(x_cooridinate +100*sin(radians(k)),y_coordinate,20*cos(radians(m)),20*cos(radians(m)));
+    ellipse(x_cooridinate +100*sin(radians(k)+PI/3),y_coordinate,20*cos(radians(m)+PI/3),20*cos(radians(m)+PI/3));
+    ellipse(x_cooridinate +100*sin(radians(k)+PI/6),y_coordinate,20*cos(radians(m)+PI/6),20*cos(radians(m)+PI/6));
+    if(k<180){
+       k+=2;
+      if(90<k){
+        if(m<180) m+=4;
+      else m = 0;
+      }
+    }
+    else {
+      k=0;
+      m=0;
+    }
+  }
 }
 function mouseClicked(){
 
@@ -65,7 +89,8 @@ function mouseClicked(){
       moves_rendering.push(drawfunc(mouseX,mouseY))
   
       board_array = makeMove(attempted_move,board_array,X_to_play)
-  
+      loading_animation = true
+
       X_to_play = !X_to_play
       user_to_play = false
 
@@ -90,7 +115,6 @@ worker.onmessage = function(event) {
   board_array = makeMove(computer_move,board_array,X_to_play)
   //Add the information to the pseudo console
   addToPseudo(`Move found in ${data.elapsed}ms`)
-  addToPseudo(`${data.branches_pruned} branches were pruned using alpha-beta pruning`)
   addToPseudo(`the orientation agnostic cache of minimax outputs was accessed ${data.cache_accessed} times`)
   addToPseudo(`${data.outputs_cached} new minimax answers were cached`)
 
@@ -105,11 +129,12 @@ worker.onmessage = function(event) {
     endstate(post_comp_gamestate)
   }else{
     X_to_play = !X_to_play
+    user_to_play = true
     //The computer move has not finished the game and it's back to the users turn of play
   }
 
-  user_to_play = true
-  //Stop gif
+  
+  loading_animation = false
 };
 //############################################
 function win_indicator(line_flag){
@@ -172,7 +197,7 @@ if tied: Show that
   }
 
   user_to_play = false
-  textStyle(NORMAL)
+  loading_animation = false
 }
 
 function clearBoard(){
@@ -181,6 +206,7 @@ function clearBoard(){
   board_array = returnClearBoard(tic_tac_size)
   X_to_play = true
   user_to_play = true
+  
 }
 
 function drawTicTacToe(weight = 3) {
