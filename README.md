@@ -1,7 +1,3 @@
-
-
-
-
 # Tic-Tac-Toe with Minimax and Orientation-Agnostic Memoization
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
@@ -51,7 +47,7 @@ This command will start a local server and automatically open your project in th
 
 ## Implementation details
 ### Minimax algorithm
-The Minimax algorithm recursively explores each potential move, assigning scores based on the eventual game outcome: win, lose, or draw. The AI selects the move with the highest score to ensure the best possible outcome.
+The Minimax algorithm recursively explores each potential move, assigning scores based on the eventual game outcome: win, lose, or draw which is then used to select the move with the highest score to ensure the best possible outcome.
 ### Orientation-agnostic memoization
 To optimize performance, the algorithm caches evaluated board states. Since different orientations (rotations and reflections) of the same board are equivalent, the memoization process normalizes each board state to its canonical form before caching by:
 1. rotating the matrix representing the board state 90, 180 and 270 degrees
