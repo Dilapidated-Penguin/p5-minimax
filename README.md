@@ -4,8 +4,6 @@
 
 ![p5.js](https://img.shields.io/badge/p5.js-ED225D?style=for-the-badge&logo=p5.js&logoColor=FFFFFF)
 
-![Last Commit](https://img.shields.io/github/Dilapidated-Penguin/p5-minimax)
-
 This project implements an unbeatable computer agent for Tic-Tac-Toe using the Minimax algorithm, visualized with the p5.js library. To enhance performance, it incorporates orientation-agnostic memoization, ensuring efficient state evaluation regardless of board rotations or reflections.
 
 ### Features
