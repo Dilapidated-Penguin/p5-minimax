@@ -33,6 +33,8 @@ const worker = new Worker('worker.js');
 function setup() {
   createCanvas(Canvas_length + 450, Canvas_length);
 
+  textStyle(BOLD)
+
   let newGame = createButton("Start new game")
   newGame.position(Canvas_length,30)
   newGame.mousePressed(clearBoard)
@@ -187,7 +189,6 @@ ENDSTATE
 if won: add line to show win to moves_rendering + display text about who won
 if tied: Show that 
 */
-  textStyle(BOLD)
   if(state.won){
     //Add the win text + Add the line denoting the win
     addToPseudo(`${state.winner} has won the game`)
